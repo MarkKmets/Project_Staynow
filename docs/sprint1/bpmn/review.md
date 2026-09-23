@@ -13,7 +13,7 @@
 
 | Параметр | Значення |
 | :--- | :--- |
-| **Назва артефакту / файлу** | `01_order.bpmn` , `02_checkin_checkout.bpmn`, `03_cancellation.bpmn`, `04_guest_messages.bpmn` (та `.pdf` / `.png`) |
+| **Назва артефакту / файлу** | `01_order.bpmn` , `02_check-in and check-out.bpmn`, `03_cancellation.bpmn`, `04_guest_messages.bpmn` (та `.pdf` / `.png`) |
 | **Назва процесу** | `` |
 | **Автор (Виконавець)** | `Тіньков Данііл` (Інженер з тестування) |
 | **Рецензент** | `Ярослав Гатченко` (Аудитор-опонент)|

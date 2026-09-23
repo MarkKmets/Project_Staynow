@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Model3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.29.0">
+  <bpmn:collaboration id="Collaboration_Model3">
+    <bpmn:participant id="Participant_Guest3" name="Гість" processRef="Process_Guest3" />
+    <bpmn:participant id="Participant_Hotel3" name="Готель" processRef="Process_Hotel3" />
+    <bpmn:participant id="Participant_Provider" name="Платіжний провайдер" processRef="Process_Provider" />
+    <bpmn:messageFlow id="MF1" name="Запит на скасування" sourceRef="G_SendCancelRequest" targetRef="H_StartCancelRequest" />
+    <bpmn:messageFlow id="MF2" name="Сума до повернення" sourceRef="H_SendAmount" targetRef="G_CatchAmount" />
+    <bpmn:messageFlow id="MF3" name="Підтвердження" sourceRef="G_SendConfirm" targetRef="H_CatchConfirm" />
+    <bpmn:messageFlow id="MF4a" name="Без повернення" sourceRef="H_SendNoRefund" targetRef="G_CatchFinal" />
+    <bpmn:messageFlow id="MF4b" name="Кошти повернуто" sourceRef="H_SendRefunded" targetRef="G_CatchFinal" />
+    <bpmn:messageFlow id="MF5" name="Запит на повернення" sourceRef="H_SendRefundRequest" targetRef="P_Start" />
+    <bpmn:messageFlow id="MF6" name="Повернення підтверджено" sourceRef="P_SendConfirm" targetRef="H_CatchProviderConfirm" />
+    <bpmn:textAnnotation id="TextAnnotation_Penalty">
+      <bpmn:text>Пороги штрафу — за політикою скасування, точні відсотки уточнюються у SRS</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Penalty" sourceRef="H_GatewayDays" targetRef="TextAnnotation_Penalty" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Guest3" isExecutable="false">
+    <bpmn:startEvent id="G_Start" name="Гість запросив скасування бронювання">
+      <bpmn:outgoing>G_SF1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="G_SendCancelRequest" name="Надіслати запит на скасування">
+      <bpmn:incoming>G_SF1</bpmn:incoming>
+      <bpmn:outgoing>G_SF2</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="G_CatchFinal" name="Отримано підсумкове рішення щодо скасування">
+      <bpmn:incoming>G_SF4</bpmn:incoming>
+      <bpmn:outgoing>G_SF5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_G2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="G_End" name="Скасування оброблено">
+      <bpmn:incoming>G_SF5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="G_CatchAmount" name="Отримано суму до повернення, запит на підтвердження">
+      <bpmn:incoming>G_SF2</bpmn:incoming>
+      <bpmn:outgoing>G_SF3</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_G1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="G_SendConfirm" name="Підтвердити скасування">
+      <bpmn:incoming>G_SF3</bpmn:incoming>
+      <bpmn:outgoing>G_SF4</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="G_SF1" sourceRef="G_Start" targetRef="G_SendCancelRequest" />
+    <bpmn:sequenceFlow id="G_SF2" sourceRef="G_SendCancelRequest" targetRef="G_CatchAmount" />
+    <bpmn:sequenceFlow id="G_SF4" sourceRef="G_SendConfirm" targetRef="G_CatchFinal" />
+    <bpmn:sequenceFlow id="G_SF5" sourceRef="G_CatchFinal" targetRef="G_End" />
+    <bpmn:sequenceFlow id="G_SF3" sourceRef="G_CatchAmount" targetRef="G_SendConfirm" />
+  </bpmn:process>
+  <bpmn:process id="Process_Hotel3" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Hotel3">
+      <bpmn:lane id="Lane_Manager3" name="Менеджер">
+        <bpmn:flowNodeRef>H_InitiateRefund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_CatchProviderConfirm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_SendRefundRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_SendRefunded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_EndRefunded</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System3" name="Система">
+        <bpmn:flowNodeRef>H_StartCancelRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_EndNoRefund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_SendNoRefund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_GatewayRefundGt0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_EndChangedMind</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_CancelCancellation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_CatchTimeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_ReleaseRoom</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_CatchConfirm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_GatewayEventBased</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_SendAmount</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_GatewaySync</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_Penalty0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_PenaltyPart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_Penalty100</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_GatewayDays</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>H_DetermineDays</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="H_StartCancelRequest" name="Отримано запит на скасування">
+      <bpmn:outgoing>H_SF1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_H1" />
+    </bpmn:startEvent>
+    <bpmn:task id="H_InitiateRefund" name="Ініціювати повернення коштів через провайдера">
+      <bpmn:incoming>H_SF13</bpmn:incoming>
+      <bpmn:outgoing>H_SF15</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="H_CatchProviderConfirm" name="Отримано підтвердження повернення від провайдера">
+      <bpmn:incoming>H_SF16</bpmn:incoming>
+      <bpmn:outgoing>H_SF17</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_H3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="H_SendRefundRequest" name="Надіслати запит на повернення">
+      <bpmn:incoming>H_SF15</bpmn:incoming>
+      <bpmn:outgoing>H_SF16</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="H_SendRefunded" name="Повідомити гостя про повернення коштів">
+      <bpmn:incoming>H_SF17</bpmn:incoming>
+      <bpmn:outgoing>H_SF18</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="H_EndRefunded" name="Скасовано, кошти повернуто">
+      <bpmn:incoming>H_SF18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="H_EndNoRefund" name="Скасовано без повернення">
+      <bpmn:incoming>H_SF14</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="H_SendNoRefund" name="Повідомити гостя про скасування без повернення">
+      <bpmn:incoming>H_SF12</bpmn:incoming>
+      <bpmn:outgoing>H_SF14</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="H_GatewayRefundGt0" name="Сума повернення &#62; 0?">
+      <bpmn:incoming>H_SF11</bpmn:incoming>
+      <bpmn:outgoing>H_SF12</bpmn:outgoing>
+      <bpmn:outgoing>H_SF13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="H_EndChangedMind" name="Гість передумав">
+      <bpmn:incoming>H_SF10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="H_CancelCancellation" name="Скасувати заявку на скасування">
+      <bpmn:incoming>H_SF9</bpmn:incoming>
+      <bpmn:outgoing>H_SF10</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="H_CatchTimeout" name="Минуло 10 хвилин без відповіді">
+      <bpmn:incoming>H_SF7b</bpmn:incoming>
+      <bpmn:outgoing>H_SF9</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_H1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:dataStoreReference id="DataStoreReference_Calendar" name="Календар бронювань" />
+    <bpmn:task id="H_ReleaseRoom" name="Звільнити номер у календарі">
+      <bpmn:incoming>H_SF8</bpmn:incoming>
+      <bpmn:outgoing>H_SF11</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_3">
+        <bpmn:targetRef>DataStoreReference_Calendar</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="H_CatchConfirm" name="Отримано підтвердження скасування">
+      <bpmn:incoming>H_SF7a</bpmn:incoming>
+      <bpmn:outgoing>H_SF8</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_H2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:eventBasedGateway id="H_GatewayEventBased" name="Що станеться раніше — підтвердження гостя чи таймаут?">
+      <bpmn:incoming>H_SF6</bpmn:incoming>
+      <bpmn:outgoing>H_SF7a</bpmn:outgoing>
+      <bpmn:outgoing>H_SF7b</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:sendTask id="H_SendAmount" name="Показати суму до повернення і запросити підтвердження">
+      <bpmn:incoming>H_SF5</bpmn:incoming>
+      <bpmn:outgoing>H_SF6</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="H_GatewaySync">
+      <bpmn:incoming>H_SF4a</bpmn:incoming>
+      <bpmn:incoming>H_SF4b</bpmn:incoming>
+      <bpmn:incoming>H_SF4c</bpmn:incoming>
+      <bpmn:outgoing>H_SF5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="H_Penalty0" name="Обчислити штраф 0 % — без штрафу">
+      <bpmn:incoming>H_SF3a</bpmn:incoming>
+      <bpmn:outgoing>H_SF4a</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="H_PenaltyPart" name="Обчислити штраф за частковою ставкою">
+      <bpmn:incoming>H_SF3b</bpmn:incoming>
+      <bpmn:outgoing>H_SF4b</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="H_Penalty100" name="Обчислити штраф 100 % — без повернення">
+      <bpmn:incoming>H_SF3c</bpmn:incoming>
+      <bpmn:outgoing>H_SF4c</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1fa6u9r">
+        <bpmn:targetRef>DataObjectReference_Penalty</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataObjectReference id="DataObjectReference_Penalty" name="Розрахунок штрафу" dataObjectRef="DataObject_Penalty" />
+    <bpmn:dataObject id="DataObject_Penalty" />
+    <bpmn:exclusiveGateway id="H_GatewayDays" name="Скільки днів залишилось до заїзду?">
+      <bpmn:incoming>H_SF2</bpmn:incoming>
+      <bpmn:outgoing>H_SF3a</bpmn:outgoing>
+      <bpmn:outgoing>H_SF3b</bpmn:outgoing>
+      <bpmn:outgoing>H_SF3c</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="H_DetermineDays" name="Визначити кількість днів до дати заїзду">
+      <bpmn:incoming>H_SF1</bpmn:incoming>
+      <bpmn:outgoing>H_SF2</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_1">
+        <bpmn:targetRef>DataStoreReference_Bookings3</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="DataStoreReference_Bookings3" name="Реєстр бронювань" />
+    <bpmn:sequenceFlow id="H_SF1" sourceRef="H_StartCancelRequest" targetRef="H_DetermineDays" />
+    <bpmn:sequenceFlow id="H_SF13" name="так" sourceRef="H_GatewayRefundGt0" targetRef="H_InitiateRefund" />
+    <bpmn:sequenceFlow id="H_SF15" sourceRef="H_InitiateRefund" targetRef="H_SendRefundRequest" />
+    <bpmn:sequenceFlow id="H_SF16" sourceRef="H_SendRefundRequest" targetRef="H_CatchProviderConfirm" />
+    <bpmn:sequenceFlow id="H_SF17" sourceRef="H_CatchProviderConfirm" targetRef="H_SendRefunded" />
+    <bpmn:sequenceFlow id="H_SF18" sourceRef="H_SendRefunded" targetRef="H_EndRefunded" />
+    <bpmn:sequenceFlow id="H_SF14" sourceRef="H_SendNoRefund" targetRef="H_EndNoRefund" />
+    <bpmn:sequenceFlow id="H_SF12" name="ні" sourceRef="H_GatewayRefundGt0" targetRef="H_SendNoRefund" />
+    <bpmn:sequenceFlow id="H_SF11" sourceRef="H_ReleaseRoom" targetRef="H_GatewayRefundGt0" />
+    <bpmn:sequenceFlow id="H_SF10" sourceRef="H_CancelCancellation" targetRef="H_EndChangedMind" />
+    <bpmn:sequenceFlow id="H_SF9" sourceRef="H_CatchTimeout" targetRef="H_CancelCancellation" />
+    <bpmn:sequenceFlow id="H_SF7b" sourceRef="H_GatewayEventBased" targetRef="H_CatchTimeout" />
+    <bpmn:sequenceFlow id="H_SF8" sourceRef="H_CatchConfirm" targetRef="H_ReleaseRoom" />
+    <bpmn:sequenceFlow id="H_SF7a" sourceRef="H_GatewayEventBased" targetRef="H_CatchConfirm" />
+    <bpmn:sequenceFlow id="H_SF6" sourceRef="H_SendAmount" targetRef="H_GatewayEventBased" />
+    <bpmn:sequenceFlow id="H_SF5" sourceRef="H_GatewaySync" targetRef="H_SendAmount" />
+    <bpmn:sequenceFlow id="H_SF4a" sourceRef="H_Penalty0" targetRef="H_GatewaySync" />
+    <bpmn:sequenceFlow id="H_SF4b" sourceRef="H_PenaltyPart" targetRef="H_GatewaySync" />
+    <bpmn:sequenceFlow id="H_SF4c" sourceRef="H_Penalty100" targetRef="H_GatewaySync" />
+    <bpmn:sequenceFlow id="H_SF3a" name="≥7 днів" sourceRef="H_GatewayDays" targetRef="H_Penalty0" />
+    <bpmn:sequenceFlow id="H_SF3b" name="3–6 днів" sourceRef="H_GatewayDays" targetRef="H_PenaltyPart" />
+    <bpmn:sequenceFlow id="H_SF3c" name="&#60;3 днів" sourceRef="H_GatewayDays" targetRef="H_Penalty100" />
+    <bpmn:sequenceFlow id="H_SF2" sourceRef="H_DetermineDays" targetRef="H_GatewayDays" />
+  </bpmn:process>
+  <bpmn:process id="Process_Provider" isExecutable="false">
+    <bpmn:startEvent id="P_Start" name="Отримано запит на повернення">
+      <bpmn:outgoing>P_SF1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_P1" />
+    </bpmn:startEvent>
+    <bpmn:task id="P_Process" name="Обробити повернення коштів">
+      <bpmn:incoming>P_SF1</bpmn:incoming>
+      <bpmn:outgoing>P_SF2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sendTask id="P_SendConfirm" name="Підтвердити повернення">
+      <bpmn:incoming>P_SF2</bpmn:incoming>
+      <bpmn:outgoing>P_SF3</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="P_End" name="Повернення оброблено провайдером">
+      <bpmn:incoming>P_SF3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="P_SF1" sourceRef="P_Start" targetRef="P_Process" />
+    <bpmn:sequenceFlow id="P_SF2" sourceRef="P_Process" targetRef="P_SendConfirm" />
+    <bpmn:sequenceFlow id="P_SF3" sourceRef="P_SendConfirm" targetRef="P_End" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Model3">
+    <bpmndi:BPMNPlane id="BPMNPlane_Model3" bpmnElement="Collaboration_Model3">
+      <bpmndi:BPMNShape id="Participant_Guest3_di" bpmnElement="Participant_Guest3" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1900" height="340" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_Start_di" bpmnElement="G_Start">
+        <dc:Bounds x="180" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="161" y="168" width="75" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_SendCancelRequest_di" bpmnElement="G_SendCancelRequest">
+        <dc:Bounds x="290" y="110" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_CatchFinal_di" bpmnElement="G_CatchFinal">
+        <dc:Bounds x="1750" y="292" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1731" y="228.5" width="73" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_End_di" bpmnElement="G_End">
+        <dc:Bounds x="1882" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1870" y="278" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_CatchAmount_di" bpmnElement="G_CatchAmount">
+        <dc:Bounds x="721" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="699.5" y="108.5" width="79" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_SendConfirm_di" bpmnElement="G_SendConfirm">
+        <dc:Bounds x="1120" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="G_SF1_di" bpmnElement="G_SF1">
+        <di:waypoint x="216" y="150" />
+        <di:waypoint x="290" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="G_SF2_di" bpmnElement="G_SF2">
+        <di:waypoint x="390" y="150" />
+        <di:waypoint x="410" y="150" />
+        <di:waypoint x="410" y="190" />
+        <di:waypoint x="721" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="G_SF3_di" bpmnElement="G_SF3">
+        <di:waypoint x="757" y="190" />
+        <di:waypoint x="1120" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="G_SF4_di" bpmnElement="G_SF4">
+        <di:waypoint x="1170" y="230" />
+        <di:waypoint x="1170" y="310" />
+        <di:waypoint x="1750" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="G_SF5_di" bpmnElement="G_SF5">
+        <di:waypoint x="1786" y="310" />
+        <di:waypoint x="1813" y="310" />
+        <di:waypoint x="1813" y="260" />
+        <di:waypoint x="1882" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_Hotel3_di" bpmnElement="Participant_Hotel3" isHorizontal="true">
+        <dc:Bounds x="120" y="460" width="2000" height="580" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Manager3_di" bpmnElement="Lane_Manager3" isHorizontal="true">
+        <dc:Bounds x="150" y="810" width="1970" height="230" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_System3_di" bpmnElement="Lane_System3" isHorizontal="true">
+        <dc:Bounds x="150" y="460" width="1970" height="350" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_StartCancelRequest_di" bpmnElement="H_StartCancelRequest">
+        <dc:Bounds x="202" y="602" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="178" y="638" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_InitiateRefund_di" bpmnElement="H_InitiateRefund">
+        <dc:Bounds x="1400" y="870" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_CatchProviderConfirm_di" bpmnElement="H_CatchProviderConfirm">
+        <dc:Bounds x="1700" y="892" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1678" y="828.5" width="79" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_SendRefundRequest_di" bpmnElement="H_SendRefundRequest">
+        <dc:Bounds x="1550" y="870" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_SendRefunded_di" bpmnElement="H_SendRefunded">
+        <dc:Bounds x="1800" y="870" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_EndRefunded_di" bpmnElement="H_EndRefunded">
+        <dc:Bounds x="1962" y="892" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1937" y="928" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_EndNoRefund_di" bpmnElement="H_EndNoRefund">
+        <dc:Bounds x="1742" y="632" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1722" y="668" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_SendNoRefund_di" bpmnElement="H_SendNoRefund">
+        <dc:Bounds x="1620" y="480" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_GatewayRefundGt0_di" bpmnElement="H_GatewayRefundGt0" isMarkerVisible="true">
+        <dc:Bounds x="1485" y="595" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1545" y="606" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_EndChangedMind_di" bpmnElement="H_EndChangedMind">
+        <dc:Bounds x="1412" y="662" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1388" y="698" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_CancelCancellation_di" bpmnElement="H_CancelCancellation">
+        <dc:Bounds x="1230" y="675" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_CatchTimeout_di" bpmnElement="H_CatchTimeout">
+        <dc:Bounds x="1115" y="702" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1105" y="738" width="57" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_Calendar_di" bpmnElement="DataStoreReference_Calendar">
+        <dc:Bounds x="1405" y="515" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1401" y="477.5" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_ReleaseRoom_di" bpmnElement="H_ReleaseRoom">
+        <dc:Bounds x="1260" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_CatchConfirm_di" bpmnElement="H_CatchConfirm">
+        <dc:Bounds x="1152" y="592" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1132" y="628" width="76" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_GatewayEventBased_di" bpmnElement="H_GatewayEventBased">
+        <dc:Bounds x="1035" y="585" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1022" y="509" width="76" height="66" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_SendAmount_di" bpmnElement="H_SendAmount">
+        <dc:Bounds x="890" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_GatewaySync_di" bpmnElement="H_GatewaySync" isMarkerVisible="true">
+        <dc:Bounds x="815" y="585" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_Penalty0_di" bpmnElement="H_Penalty0">
+        <dc:Bounds x="670" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_PenaltyPart_di" bpmnElement="H_PenaltyPart">
+        <dc:Bounds x="670" y="570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_Penalty100_di" bpmnElement="H_Penalty100">
+        <dc:Bounds x="670" y="668" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_Penalty_di" bpmnElement="DataObjectReference_Penalty">
+        <dc:Bounds x="852" y="725" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="840" y="776" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_GatewayDays_di" bpmnElement="H_GatewayDays" isMarkerVisible="true">
+        <dc:Bounds x="505" y="595" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="491" y="645" width="79" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="H_DetermineDays_di" bpmnElement="H_DetermineDays">
+        <dc:Bounds x="310" y="580" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_Bookings3_di" bpmnElement="DataStoreReference_Bookings3">
+        <dc:Bounds x="319" y="715" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="316" y="765" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="H_SF1_di" bpmnElement="H_SF1">
+        <di:waypoint x="238" y="620" />
+        <di:waypoint x="310" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF2_di" bpmnElement="H_SF2">
+        <di:waypoint x="410" y="620" />
+        <di:waypoint x="505" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF3a_di" bpmnElement="H_SF3a">
+        <di:waypoint x="530" y="595" />
+        <di:waypoint x="530" y="510" />
+        <di:waypoint x="670" y="510" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="542" y="535" width="36" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF3b_di" bpmnElement="H_SF3b">
+        <di:waypoint x="555" y="620" />
+        <di:waypoint x="613" y="620" />
+        <di:waypoint x="613" y="610" />
+        <di:waypoint x="670" y="610" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="621" y="585" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF3c_di" bpmnElement="H_SF3c">
+        <di:waypoint x="530" y="645" />
+        <di:waypoint x="530" y="708" />
+        <di:waypoint x="670" y="708" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="571" y="693" width="37" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF4a_di" bpmnElement="H_SF4a">
+        <di:waypoint x="770" y="510" />
+        <di:waypoint x="840" y="510" />
+        <di:waypoint x="840" y="585" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF4b_di" bpmnElement="H_SF4b">
+        <di:waypoint x="770" y="610" />
+        <di:waypoint x="815" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF4c_di" bpmnElement="H_SF4c">
+        <di:waypoint x="770" y="708" />
+        <di:waypoint x="840" y="708" />
+        <di:waypoint x="840" y="635" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF5_di" bpmnElement="H_SF5">
+        <di:waypoint x="865" y="610" />
+        <di:waypoint x="890" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF6_di" bpmnElement="H_SF6">
+        <di:waypoint x="990" y="610" />
+        <di:waypoint x="1035" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF7a_di" bpmnElement="H_SF7a">
+        <di:waypoint x="1085" y="610" />
+        <di:waypoint x="1152" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF7b_di" bpmnElement="H_SF7b">
+        <di:waypoint x="1060" y="635" />
+        <di:waypoint x="1060" y="720" />
+        <di:waypoint x="1115" y="720" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF8_di" bpmnElement="H_SF8">
+        <di:waypoint x="1188" y="610" />
+        <di:waypoint x="1260" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF9_di" bpmnElement="H_SF9">
+        <di:waypoint x="1151" y="719" />
+        <di:waypoint x="1191" y="719" />
+        <di:waypoint x="1191" y="717" />
+        <di:waypoint x="1230" y="717" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF10_di" bpmnElement="H_SF10">
+        <di:waypoint x="1330" y="715" />
+        <di:waypoint x="1371" y="715" />
+        <di:waypoint x="1371" y="680" />
+        <di:waypoint x="1412" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF11_di" bpmnElement="H_SF11">
+        <di:waypoint x="1360" y="610" />
+        <di:waypoint x="1423" y="610" />
+        <di:waypoint x="1423" y="620" />
+        <di:waypoint x="1485" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF12_di" bpmnElement="H_SF12">
+        <di:waypoint x="1510" y="595" />
+        <di:waypoint x="1510" y="520" />
+        <di:waypoint x="1620" y="520" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1521" y="548" width="9" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF13_di" bpmnElement="H_SF13">
+        <di:waypoint x="1510" y="645" />
+        <di:waypoint x="1510" y="758" />
+        <di:waypoint x="1450" y="758" />
+        <di:waypoint x="1450" y="870" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1517" y="693" width="16" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF14_di" bpmnElement="H_SF14">
+        <di:waypoint x="1670" y="560" />
+        <di:waypoint x="1670" y="650" />
+        <di:waypoint x="1742" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF15_di" bpmnElement="H_SF15">
+        <di:waypoint x="1500" y="910" />
+        <di:waypoint x="1550" y="910" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF16_di" bpmnElement="H_SF16">
+        <di:waypoint x="1650" y="910" />
+        <di:waypoint x="1700" y="910" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF17_di" bpmnElement="H_SF17">
+        <di:waypoint x="1736" y="910" />
+        <di:waypoint x="1800" y="910" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="H_SF18_di" bpmnElement="H_SF18">
+        <di:waypoint x="1900" y="910" />
+        <di:waypoint x="1962" y="910" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_Provider_di" bpmnElement="Participant_Provider" isHorizontal="true">
+        <dc:Bounds x="1390" y="1140" width="700" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_Start_di" bpmnElement="P_Start">
+        <dc:Bounds x="1500" y="1222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1476" y="1258" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_Process_di" bpmnElement="P_Process">
+        <dc:Bounds x="1590" y="1200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_SendConfirm_di" bpmnElement="P_SendConfirm">
+        <dc:Bounds x="1740" y="1200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_End_di" bpmnElement="P_End">
+        <dc:Bounds x="1890" y="1222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1874" y="1258" width="69" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="P_SF1_di" bpmnElement="P_SF1">
+        <di:waypoint x="1536" y="1240" />
+        <di:waypoint x="1590" y="1240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P_SF2_di" bpmnElement="P_SF2">
+        <di:waypoint x="1690" y="1240" />
+        <di:waypoint x="1740" y="1240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="P_SF3_di" bpmnElement="P_SF3">
+        <di:waypoint x="1840" y="1240" />
+        <di:waypoint x="1890" y="1240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_Penalty_di" bpmnElement="Association_Penalty">
+        <di:waypoint x="516" y="609" />
+        <di:waypoint x="440" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_1_di" bpmnElement="DOA_1">
+        <di:waypoint x="350" y="660" />
+        <di:waypoint x="350" y="715" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_3_di" bpmnElement="DOA_3">
+        <di:waypoint x="1360" y="582" />
+        <di:waypoint x="1405" y="553" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF1_di" bpmnElement="MF1">
+        <di:waypoint x="340" y="190" />
+        <di:waypoint x="340" y="430" />
+        <di:waypoint x="220" y="430" />
+        <di:waypoint x="220" y="602" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="251" y="405" width="58" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF2_di" bpmnElement="MF2">
+        <di:waypoint x="940" y="570" />
+        <di:waypoint x="940" y="400" />
+        <di:waypoint x="739" y="400" />
+        <di:waypoint x="739" y="208" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="809" y="375" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF3_di" bpmnElement="MF3">
+        <di:waypoint x="1170" y="230" />
+        <di:waypoint x="1170" y="592" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1149" y="404" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF4a_di" bpmnElement="MF4a">
+        <di:waypoint x="1670" y="480" />
+        <di:waypoint x="1670" y="360" />
+        <di:waypoint x="1768" y="360" />
+        <di:waypoint x="1768" y="328" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1678" y="335" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF4b_di" bpmnElement="MF4b">
+        <di:waypoint x="1850" y="870" />
+        <di:waypoint x="1850" y="370" />
+        <di:waypoint x="1770" y="370" />
+        <di:waypoint x="1770" y="328" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1856" y="393" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF5_di" bpmnElement="MF5">
+        <di:waypoint x="1568" y="950" />
+        <di:waypoint x="1568" y="1086" />
+        <di:waypoint x="1518" y="1086" />
+        <di:waypoint x="1518" y="1222" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1449" y="1156" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MF6_di" bpmnElement="MF6">
+        <di:waypoint x="1760" y="1200" />
+        <di:waypoint x="1760" y="960" />
+        <di:waypoint x="1718" y="960" />
+        <di:waypoint x="1718" y="928" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1683" y="986" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1fa6u9r_di" bpmnElement="DataOutputAssociation_1fa6u9r">
+        <di:waypoint x="770" y="722" />
+        <di:waypoint x="852" y="744" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_Penalty_di" bpmnElement="TextAnnotation_Penalty">
+        <dc:Bounds x="280" y="480" width="220" height="70" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

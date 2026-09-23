@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Model2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.29.0">
+  <bpmn:collaboration id="Collaboration_Model2">
+    <bpmn:participant id="Participant_Hotel2" name="Готель" processRef="Process_Hotel2" />
+    <bpmn:participant id="Participant_Cleaning" name="Служба прибирання" processRef="Process_Cleaning2" />
+    <bpmn:messageFlow id="MessageFlow_1" name="Направити на прибирання" sourceRef="SendTask_SendToCleaning" targetRef="StartEvent_ReceivedRoom" />
+    <bpmn:messageFlow id="MessageFlow_2" name="Прибирання завершено" sourceRef="SendTask_ConfirmCleaning" targetRef="Event_ReceivedCleaningConfirm" />
+    <bpmn:textAnnotation id="TextAnnotation_Parallel">
+      <bpmn:text>Розрахунок додаткових послуг і прибирання номера виконуються паралельно</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1" sourceRef="Gateway_ParallelSplit" targetRef="TextAnnotation_Parallel" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Hotel2" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Hotel2">
+      <bpmn:lane id="Lane_Manager2" name="Менеджер">
+        <bpmn:flowNodeRef>Task_CalcExtra</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Admin2" name="Адміністратор">
+        <bpmn:flowNodeRef>StartEvent_CheckinDay</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_FindBooking</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ArrivalOrTimeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_GuestArrived</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_DayEnded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CheckDocument</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_IssueKey</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_CheckoutDay</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CheckRoom</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ParallelSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendTask_SendToCleaning</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_ReceivedCleaningConfirm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ParallelSync</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CloseBooking</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_CheckedOut</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MarkNoShow</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_NoShow</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_CheckinDay" name="Настав день заїзду">
+      <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1" />
+    </bpmn:startEvent>
+    <bpmn:task id="Task_FindBooking" name="Знайти бронювання гостя">
+      <bpmn:incoming>SequenceFlow_1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1">
+        <bpmn:targetRef>DataStoreReference_BookingsReg1</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:eventBasedGateway id="Gateway_ArrivalOrTimeout" name="Що станеться раніше — прибуття гостя чи кінець дня?">
+      <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_4</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_GuestArrived" name="Гість прибув на рецепцію">
+      <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_DayEnded" name="Минув день заїзду, гість не з&#39;явився">
+      <bpmn:incoming>SequenceFlow_4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_16</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="Task_CheckDocument" name="Перевірити документ гостя">
+      <bpmn:incoming>SequenceFlow_5</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_IssueKey" name="Видати ключ, встановити статус «заселено»">
+      <bpmn:incoming>SequenceFlow_6</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_7</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_2">
+        <bpmn:targetRef>DataObjectReference_Booking</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="Event_CheckoutDay" name="Настав день виїзду">
+      <bpmn:incoming>SequenceFlow_7</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_8</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="Task_CheckRoom" name="Перевірити стан номера при виїзді">
+      <bpmn:incoming>SequenceFlow_8</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Gateway_ParallelSplit">
+      <bpmn:incoming>SequenceFlow_9</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_10</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_11</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask_SendToCleaning" name="Направити номер на прибирання">
+      <bpmn:incoming>SequenceFlow_11</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_11c</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="Event_ReceivedCleaningConfirm" name="Отримано підтвердження прибирання">
+      <bpmn:incoming>SequenceFlow_11c</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_13</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="Gateway_ParallelSync">
+      <bpmn:incoming>SequenceFlow_12</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_13</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_14</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="Task_CloseBooking" name="Закрити бронювання">
+      <bpmn:incoming>SequenceFlow_14</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_15</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_4">
+        <bpmn:targetRef>DataStoreReference_BookingsReg2</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_CheckedOut" name="Виселено">
+      <bpmn:incoming>SequenceFlow_15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_MarkNoShow" name="Позначити бронювання статусом «не з&#39;явився»">
+      <bpmn:incoming>SequenceFlow_16</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_17</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_NoShow" name="Гість не з&#39;явився">
+      <bpmn:incoming>SequenceFlow_17</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:dataStoreReference id="DataStoreReference_BookingsReg1" name="Реєстр бронювань" />
+    <bpmn:dataStoreReference id="DataStoreReference_BookingsReg2" name="Реєстр бронювань" />
+    <bpmn:dataObjectReference id="DataObjectReference_Booking" name="Бронювання" dataObjectRef="DataObject_Booking" />
+    <bpmn:dataObject id="DataObject_Booking" />
+    <bpmn:task id="Task_CalcExtra" name="Розрахувати додаткові послуги і сформувати підсумковий рахунок">
+      <bpmn:incoming>SequenceFlow_10</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_12</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_3">
+        <bpmn:targetRef>DataObjectReference_Bill</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataObjectReference id="DataObjectReference_Bill" name="Підсумковий рахунок" dataObjectRef="DataObject_Bill" />
+    <bpmn:dataObject id="DataObject_Bill" />
+    <bpmn:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_CheckinDay" targetRef="Task_FindBooking" />
+    <bpmn:sequenceFlow id="SequenceFlow_2" sourceRef="Task_FindBooking" targetRef="Gateway_ArrivalOrTimeout" />
+    <bpmn:sequenceFlow id="SequenceFlow_3" sourceRef="Gateway_ArrivalOrTimeout" targetRef="Event_GuestArrived" />
+    <bpmn:sequenceFlow id="SequenceFlow_4" sourceRef="Gateway_ArrivalOrTimeout" targetRef="Event_DayEnded" />
+    <bpmn:sequenceFlow id="SequenceFlow_5" sourceRef="Event_GuestArrived" targetRef="Task_CheckDocument" />
+    <bpmn:sequenceFlow id="SequenceFlow_16" sourceRef="Event_DayEnded" targetRef="Task_MarkNoShow" />
+    <bpmn:sequenceFlow id="SequenceFlow_6" sourceRef="Task_CheckDocument" targetRef="Task_IssueKey" />
+    <bpmn:sequenceFlow id="SequenceFlow_7" sourceRef="Task_IssueKey" targetRef="Event_CheckoutDay" />
+    <bpmn:sequenceFlow id="SequenceFlow_8" sourceRef="Event_CheckoutDay" targetRef="Task_CheckRoom" />
+    <bpmn:sequenceFlow id="SequenceFlow_9" sourceRef="Task_CheckRoom" targetRef="Gateway_ParallelSplit" />
+    <bpmn:sequenceFlow id="SequenceFlow_10" sourceRef="Gateway_ParallelSplit" targetRef="Task_CalcExtra" />
+    <bpmn:sequenceFlow id="SequenceFlow_11" sourceRef="Gateway_ParallelSplit" targetRef="SendTask_SendToCleaning" />
+    <bpmn:sequenceFlow id="SequenceFlow_11c" sourceRef="SendTask_SendToCleaning" targetRef="Event_ReceivedCleaningConfirm" />
+    <bpmn:sequenceFlow id="SequenceFlow_13" sourceRef="Event_ReceivedCleaningConfirm" targetRef="Gateway_ParallelSync" />
+    <bpmn:sequenceFlow id="SequenceFlow_12" sourceRef="Task_CalcExtra" targetRef="Gateway_ParallelSync" />
+    <bpmn:sequenceFlow id="SequenceFlow_14" sourceRef="Gateway_ParallelSync" targetRef="Task_CloseBooking" />
+    <bpmn:sequenceFlow id="SequenceFlow_15" sourceRef="Task_CloseBooking" targetRef="EndEvent_CheckedOut" />
+    <bpmn:sequenceFlow id="SequenceFlow_17" sourceRef="Task_MarkNoShow" targetRef="EndEvent_NoShow" />
+  </bpmn:process>
+  <bpmn:process id="Process_Cleaning2" isExecutable="false">
+    <bpmn:endEvent id="EndEvent_RoomReady" name="Номер готовий до нового заселення">
+      <bpmn:incoming>SequenceFlow_20</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent_ReceivedRoom" name="Отримано номер на прибирання">
+      <bpmn:outgoing>SequenceFlow_18</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_3" />
+    </bpmn:startEvent>
+    <bpmn:task id="Task_CleanRoom" name="Прибрати номер">
+      <bpmn:incoming>SequenceFlow_18</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_19</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sendTask id="SendTask_ConfirmCleaning" name="Повідомити про завершення прибирання">
+      <bpmn:incoming>SequenceFlow_19</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_20</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="SequenceFlow_20" sourceRef="SendTask_ConfirmCleaning" targetRef="EndEvent_RoomReady" />
+    <bpmn:sequenceFlow id="SequenceFlow_18" sourceRef="StartEvent_ReceivedRoom" targetRef="Task_CleanRoom" />
+    <bpmn:sequenceFlow id="SequenceFlow_19" sourceRef="Task_CleanRoom" targetRef="SendTask_ConfirmCleaning" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Model2">
+    <bpmndi:BPMNPlane id="BPMNPlane_Model2" bpmnElement="Collaboration_Model2">
+      <bpmndi:BPMNShape id="Participant_Hotel2_di" bpmnElement="Participant_Hotel2" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1800" height="570" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Manager2_di" bpmnElement="Lane_Manager2" isHorizontal="true">
+        <dc:Bounds x="150" y="490" width="1770" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Admin2_di" bpmnElement="Lane_Admin2" isHorizontal="true">
+        <dc:Bounds x="150" y="80" width="1770" height="410" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_CheckinDay_di" bpmnElement="StartEvent_CheckinDay">
+        <dc:Bounds x="180" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="166" y="338" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FindBooking_di" bpmnElement="Task_FindBooking">
+        <dc:Bounds x="260" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ArrivalOrTimeout_di" bpmnElement="Gateway_ArrivalOrTimeout">
+        <dc:Bounds x="420" y="295" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="407" y="243" width="76" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_GuestArrived_di" bpmnElement="Event_GuestArrived">
+        <dc:Bounds x="520" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="499" y="338" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_DayEnded_di" bpmnElement="Event_DayEnded">
+        <dc:Bounds x="520" y="392" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="501" y="428" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckDocument_di" bpmnElement="Task_CheckDocument">
+        <dc:Bounds x="610" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_IssueKey_di" bpmnElement="Task_IssueKey">
+        <dc:Bounds x="750" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_CheckoutDay_di" bpmnElement="Event_CheckoutDay">
+        <dc:Bounds x="900" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="886" y="338" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CheckRoom_di" bpmnElement="Task_CheckRoom">
+        <dc:Bounds x="980" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ParallelSplit_di" bpmnElement="Gateway_ParallelSplit">
+        <dc:Bounds x="1130" y="295" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_SendToCleaning_di" bpmnElement="SendTask_SendToCleaning">
+        <dc:Bounds x="1250" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_ReceivedCleaningConfirm_di" bpmnElement="Event_ReceivedCleaningConfirm">
+        <dc:Bounds x="1400" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1380" y="252" width="76" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ParallelSync_di" bpmnElement="Gateway_ParallelSync">
+        <dc:Bounds x="1500" y="295" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CloseBooking_di" bpmnElement="Task_CloseBooking">
+        <dc:Bounds x="1600" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_CheckedOut_di" bpmnElement="EndEvent_CheckedOut">
+        <dc:Bounds x="1750" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1743" y="338" width="50" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MarkNoShow_di" bpmnElement="Task_MarkNoShow">
+        <dc:Bounds x="620" y="370" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_NoShow_di" bpmnElement="EndEvent_NoShow">
+        <dc:Bounds x="770" y="392" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="745" y="428" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_BookingsReg1_di" bpmnElement="DataStoreReference_BookingsReg1">
+        <dc:Bounds x="290" y="400" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="287" y="450" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_BookingsReg2_di" bpmnElement="DataStoreReference_BookingsReg2">
+        <dc:Bounds x="1630" y="400" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1627" y="450" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_Booking_di" bpmnElement="DataObjectReference_Booking">
+        <dc:Bounds x="782" y="165" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="768" y="141" width="64" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CalcExtra_di" bpmnElement="Task_CalcExtra">
+        <dc:Bounds x="1105" y="535" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_Bill_di" bpmnElement="DataObjectReference_Bill">
+        <dc:Bounds x="1012" y="525" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="998" y="575" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
+        <di:waypoint x="216" y="320" />
+        <di:waypoint x="260" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
+        <di:waypoint x="360" y="320" />
+        <di:waypoint x="420" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
+        <di:waypoint x="470" y="320" />
+        <di:waypoint x="520" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_4_di" bpmnElement="SequenceFlow_4">
+        <di:waypoint x="445" y="345" />
+        <di:waypoint x="445" y="410" />
+        <di:waypoint x="520" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_5_di" bpmnElement="SequenceFlow_5">
+        <di:waypoint x="556" y="320" />
+        <di:waypoint x="610" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_6_di" bpmnElement="SequenceFlow_6">
+        <di:waypoint x="710" y="320" />
+        <di:waypoint x="750" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_7_di" bpmnElement="SequenceFlow_7">
+        <di:waypoint x="850" y="320" />
+        <di:waypoint x="900" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_8_di" bpmnElement="SequenceFlow_8">
+        <di:waypoint x="936" y="320" />
+        <di:waypoint x="980" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_9_di" bpmnElement="SequenceFlow_9">
+        <di:waypoint x="1080" y="320" />
+        <di:waypoint x="1130" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_10_di" bpmnElement="SequenceFlow_10">
+        <di:waypoint x="1155" y="345" />
+        <di:waypoint x="1155" y="535" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_11_di" bpmnElement="SequenceFlow_11">
+        <di:waypoint x="1180" y="320" />
+        <di:waypoint x="1250" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_11c_di" bpmnElement="SequenceFlow_11c">
+        <di:waypoint x="1350" y="320" />
+        <di:waypoint x="1400" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_12_di" bpmnElement="SequenceFlow_12">
+        <di:waypoint x="1205" y="600" />
+        <di:waypoint x="1525" y="600" />
+        <di:waypoint x="1525" y="345" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_13_di" bpmnElement="SequenceFlow_13">
+        <di:waypoint x="1436" y="320" />
+        <di:waypoint x="1500" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_14_di" bpmnElement="SequenceFlow_14">
+        <di:waypoint x="1550" y="320" />
+        <di:waypoint x="1600" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_15_di" bpmnElement="SequenceFlow_15">
+        <di:waypoint x="1700" y="320" />
+        <di:waypoint x="1750" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_16_di" bpmnElement="SequenceFlow_16">
+        <di:waypoint x="556" y="410" />
+        <di:waypoint x="620" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_17_di" bpmnElement="SequenceFlow_17">
+        <di:waypoint x="720" y="410" />
+        <di:waypoint x="770" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_Cleaning_di" bpmnElement="Participant_Cleaning" isHorizontal="true">
+        <dc:Bounds x="1090" y="710" width="900" height="260" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_RoomReady_di" bpmnElement="EndEvent_RoomReady">
+        <dc:Bounds x="1612" y="812" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1592" y="848" width="76" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_ReceivedRoom_di" bpmnElement="StartEvent_ReceivedRoom">
+        <dc:Bounds x="1150" y="772" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1124" y="734.5" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CleanRoom_di" bpmnElement="Task_CleanRoom">
+        <dc:Bounds x="1220" y="840" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_ConfirmCleaning_di" bpmnElement="SendTask_ConfirmCleaning">
+        <dc:Bounds x="1400" y="840" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_18_di" bpmnElement="SequenceFlow_18">
+        <di:waypoint x="1168" y="808" />
+        <di:waypoint x="1168" y="880" />
+        <di:waypoint x="1220" y="880" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_19_di" bpmnElement="SequenceFlow_19">
+        <di:waypoint x="1320" y="880" />
+        <di:waypoint x="1400" y="880" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_20_di" bpmnElement="SequenceFlow_20">
+        <di:waypoint x="1500" y="880" />
+        <di:waypoint x="1571" y="880" />
+        <di:waypoint x="1571" y="830" />
+        <di:waypoint x="1612" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1_di" bpmnElement="Association_1">
+        <di:waypoint x="1155" y="295" />
+        <di:waypoint x="1155" y="170" />
+        <di:waypoint x="1155" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1_di" bpmnElement="DataOutputAssociation_1">
+        <di:waypoint x="310" y="360" />
+        <di:waypoint x="315" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_2_di" bpmnElement="DataOutputAssociation_2">
+        <di:waypoint x="800" y="280" />
+        <di:waypoint x="800" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_3_di" bpmnElement="DataOutputAssociation_3">
+        <di:waypoint x="1105" y="563" />
+        <di:waypoint x="1048" y="555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_4_di" bpmnElement="DataOutputAssociation_4">
+        <di:waypoint x="1650" y="360" />
+        <di:waypoint x="1655" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_1_di" bpmnElement="MessageFlow_1">
+        <di:waypoint x="1300" y="360" />
+        <di:waypoint x="1300" y="790" />
+        <di:waypoint x="1186" y="790" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1224" y="416" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MessageFlow_2_di" bpmnElement="MessageFlow_2">
+        <di:waypoint x="1418" y="840" />
+        <di:waypoint x="1418" y="338" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1348" y="436" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_Parallel_di" bpmnElement="TextAnnotation_Parallel">
+        <dc:Bounds x="1090" y="100" width="220" height="70" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

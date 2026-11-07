@@ -104,5 +104,109 @@ class PriceCalculatorTest {
     void nightPriceRejectsNonPositiveRate(BigDecimal base) {
         assertThrows(IllegalArgumentException.class, () -> calc.nightPrice(base, LocalDate.of(2026, 9, 9)));
     }
+@Test
+    @DisplayName("BL-50: 2 будні ночі у звичайний період = 200.00")
+    void totalTwoWeekdayNights() {
+        assertEquals(money("200.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 17)));
+    }
 
+    // Червоний на v1: BUG-021 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-50: одна ніч з п'ятниці на суботу = 115.00")
+    void totalFridayNightOnly() {
+        assertEquals(money("115.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 12)));
+    }
+
+    // Червоний на v1: BUG-021 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-50: одна ніч з неділі на понеділок = 100.00 (без надбавки)")
+    void totalSundayNightOnly() {
+        assertEquals(money("100.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 13), LocalDate.of(2026, 9, 14)));
+    }
+
+    // Червоний на v1: BUG-021 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-50: пн–сб (6 ночей) без знижки = 630.00")
+    void totalSixNightsNoDiscount() {
+        assertEquals(money("630.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 14), LocalDate.of(2026, 9, 20)));
+    }
+
+    @DisplayName("BL-50: на порозі 7 ночей і поруч вище — знижка 10 %")
+    @ParameterizedTest(name = "BL-50: {0} ночей зі знижкою — {1}")
+    @CsvSource({"7, 657.00", "8, 747.00"})
+    void totalAtAndAboveSevenNightsDiscount(int nights, BigDecimal expected) {
+        LocalDate checkIn = LocalDate.of(2026, 9, 14);
+        assertEquals(expected, calc.total(money("100"), checkIn, checkIn.plusDays(nights)));
+    }
+
+    @Test
+    @DisplayName("BL-50: 30 ночей (вересень) зі знижкою = 2808.00")
+    void totalThirtyNights() {
+        assertEquals(money("2808.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 1), LocalDate.of(2026, 10, 1)));
+    }
+
+    @Test
+    @DisplayName("BL-50: знижка округлюється HALF_UP: 243.45 × 0.90 = 219.105 → 219.11")
+    void totalDiscountRoundsHalfUp() {
+        assertEquals(money("219.11"),
+                calc.total(money("33.35"), LocalDate.of(2026, 9, 14), LocalDate.of(2026, 9, 21)));
+    }
+
+    // Червоний на v1: BUG-021 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-40 + BL-50: перехід межі сезону 31.05→01.06: 100.00 + 130.00 = 230.00")
+    void totalAcrossSeasonBoundary() {
+        assertEquals(money("230.00"),
+                calc.total(money("100"), LocalDate.of(2026, 5, 31), LocalDate.of(2026, 6, 2)));
+    }
+
+    // Червоний на v1: BUG-021 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-30 + BL-40: 19–21 грудня (сб, нд): 115.00 + 130.00 = 245.00")
+    void totalSaturdayAndSundayInHighSeasonStart() {
+        assertEquals(money("245.00"),
+                calc.total(money("100"), LocalDate.of(2026, 12, 19), LocalDate.of(2026, 12, 21)));
+    }
+
+    @Test
+    @DisplayName("BL-50: ніч виїзду не оплачується: інтервал [заїзд, виїзд)")
+    void checkOutNightIsNotCharged() {
+        assertEquals(money("100.00"),
+                calc.total(money("100"), LocalDate.of(2026, 9, 9), LocalDate.of(2026, 9, 10)));
+    }
+
+    @DisplayName("BL-50: total із тарифом «{0}» — IllegalArgumentException")
+    @ParameterizedTest(name = "BL-50: total із тарифом «{0}» — IllegalArgumentException")
+    @CsvSource({"0", "-100"})
+    void totalRejectsNonPositiveRate(BigDecimal base) {
+        assertThrows(IllegalArgumentException.class,
+                () -> calc.total(base, LocalDate.of(2026, 9, 9), LocalDate.of(2026, 9, 10)));
+    }
+
+    @Test
+    @DisplayName("BL-50: виїзд = заїзд — IllegalArgumentException")
+    void totalSameDayRejected() {
+        LocalDate d = LocalDate.of(2026, 9, 9);
+        assertThrows(IllegalArgumentException.class, () -> calc.total(money("100"), d, d));
+    }
+    @Test
+    @DisplayName("BL-50: виїзд раніший за заїзд — IllegalArgumentException")
+    void totalReversedDatesRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> calc.total(money("100"), LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 9)));
+    }
+
+    @Test
+    @DisplayName("BL-50: результат має рівно 2 знаки після коми")
+    void totalHasTwoDecimalPlaces() {
+        BigDecimal t = calc.total(money("100"), LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 16));
+        assertAll("BL-50: значення суми та грошова шкала",
+                () -> assertEquals(2, t.scale()),
+                () -> assertEquals(0, money("100").compareTo(t)));
+    }
 }

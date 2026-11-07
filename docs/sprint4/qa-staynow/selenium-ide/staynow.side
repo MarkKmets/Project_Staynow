@@ -1,0 +1,277 @@
+{
+  "id": "8d25eeda-049c-40b2-8f05-bd8dd80df9b1",
+  "version": "2.0",
+  "name": "staynow",
+  "url": "https://automationintesting.online",
+  "tests": [{
+    "id": "3fdd01b1-cdb8-4109-85b9-ce739fe74321",
+    "name": "TC-001/TC-004 Головна сторінка і перехід на Admin",
+    "commands": [{
+      "id": "17b37a7b-25f8-425b-bdff-a3199145e3e4",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "ab189e0b-12b0-4b72-8d07-e74f02b3f466",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1366x900",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "7e1866cd-b2d4-4ee3-aade-5bf1cf5aa7a0",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "css=h1",
+      "targets": [],
+      "value": "5000"
+    }, {
+      "id": "c5a67298-3290-426f-b239-97906be2e8fd",
+      "comment": "Сайт може змінити текст заголовка — тоді оновити",
+      "command": "assertText",
+      "target": "css=h1",
+      "targets": [],
+      "value": "Welcome to Shady Meadows B&B"
+    }, {
+      "id": "dfad9dc2-5c40-4a63-b0da-49e8d0ecf0f9",
+      "comment": "verify — м'яка перевірка, тест іде далі",
+      "command": "verifyElementPresent",
+      "target": "xpath=//a[normalize-space()='Book Now']",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "d426350c-d3f0-4487-9f9f-4718c348ff9f",
+      "comment": "",
+      "command": "assertText",
+      "target": "xpath=//nav//a[normalize-space()='Admin']",
+      "targets": [],
+      "value": "Admin"
+    }, {
+      "id": "9f48d4c6-586b-4de6-8336-7314c2635ff9",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//nav//a[normalize-space()='Admin']",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "877930a1-068b-4be3-9c47-fb3a30610842",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "css=input[type='password']",
+      "targets": [],
+      "value": "5000"
+    }, {
+      "id": "be6e7786-1948-4133-8d11-695b5b8d24b1",
+      "comment": "",
+      "command": "assertElementPresent",
+      "target": "xpath=//button[normalize-space()='Login']",
+      "targets": [],
+      "value": ""
+    }]
+  }, {
+    "id": "03d24dd4-559a-4615-8d70-2d8f1f3452fe",
+    "name": "TC-024 Контактна форма з коректними даними",
+    "commands": [{
+      "id": "a35c5358-35f9-4820-8153-9e37c16a5df8",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "70c45dba-ae29-4453-aa6d-b2e140db1368",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1366x900",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "8c5e46ac-d674-413e-a41d-5a3665d6edfc",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "id=name",
+      "targets": [],
+      "value": "5000"
+    }, {
+      "id": "e0403210-33d0-4720-9364-42714043721e",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//nav//a[normalize-space()='Contact']",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "82aa4480-2320-4247-a11c-7eea55e40b78",
+      "comment": "",
+      "command": "type",
+      "target": "id=name",
+      "targets": [],
+      "value": "Ostap Test"
+    }, {
+      "id": "267259a8-e23d-4c49-bdf4-3750f2dfb41b",
+      "comment": "",
+      "command": "type",
+      "target": "id=email",
+      "targets": [],
+      "value": "ostap.test@example.com"
+    }, {
+      "id": "209bcc83-0af5-4b83-b7c0-6f8d12931a2d",
+      "comment": "",
+      "command": "type",
+      "target": "id=phone",
+      "targets": [],
+      "value": "01234567890"
+    }, {
+      "id": "74bc5ad8-5fb9-4c03-9237-4595abbb4718",
+      "comment": "",
+      "command": "type",
+      "target": "id=subject",
+      "targets": [],
+      "value": "BR question 01"
+    }, {
+      "id": "e3157124-062f-4ad4-b0c6-c804d59854e0",
+      "comment": "",
+      "command": "type",
+      "target": "id=description",
+      "targets": [],
+      "value": "Question about booking: do you have a room for three nights in December?"
+    }, {
+      "id": "950e20cf-dcc4-4f9a-9f0c-b511c34beab7",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//button[normalize-space()='Submit']",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c1bf6d34-1c63-47c7-bf93-7b28eab8e1e7",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "xpath=//*[normalize-space(.)='Thanks for getting in touch Ostap Test!']",
+      "targets": [],
+      "value": "10000"
+    }, {
+      "id": "4e6c2b28-a723-4bc2-b39d-5752a366ea66",
+      "comment": "TC-024: подяка містить ім’я",
+      "command": "verifyElementPresent",
+      "target": "xpath=//*[normalize-space(.)='Thanks for getting in touch Ostap Test!']",
+      "targets": [],
+      "value": ""
+    }]
+  }, {
+    "id": "8b1a5cb0-5391-43ea-8547-1ba27d6f8702",
+    "name": "TC-035 Неправильний пароль — Гатченко",
+    "commands": [{
+      "id": "72dbdeec-4c66-4bed-aab0-a081bc98ab48",
+      "comment": "",
+      "command": "open",
+      "target": "/admin",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "ca42a567-9e84-4212-96aa-9196351f85a7",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "854x1002",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "73ae59e6-6e41-4fb7-a753-dffddb0a863d",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "id=username",
+      "targets": [
+        ["id=username", "id"],
+        ["css=#username", "css:finder"],
+        ["xpath=//input[@id='username']", "xpath:attributes"],
+        ["xpath=//div[@id='root-container']/div/div/div/div/div[2]/div/div[2]/form/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "10000"
+    }, {
+      "id": "f772f0d8-1701-48b7-8256-3298e62da495",
+      "comment": "",
+      "command": "type",
+      "target": "id=username",
+      "targets": [
+        ["id=username", "id"],
+        ["css=#username", "css:finder"],
+        ["xpath=//input[@id='username']", "xpath:attributes"],
+        ["xpath=//div[@id='root-container']/div/div/div/div/div[2]/div/div[2]/form/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "admin"
+    }, {
+      "id": "ab3ddb97-db2f-446e-a7c8-ca4701c3420a",
+      "comment": "",
+      "command": "click",
+      "target": "id=password",
+      "targets": [
+        ["id=password", "id"],
+        ["css=#password", "css:finder"],
+        ["xpath=//input[@id='password']", "xpath:attributes"],
+        ["xpath=//div[@id='root-container']/div/div/div/div/div[2]/div/div[2]/form/div[2]/input", "xpath:idRelative"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "6290c47c-e2e2-4851-b827-e37ec0d991c3",
+      "comment": "",
+      "command": "type",
+      "target": "id=password",
+      "targets": [
+        ["id=password", "id"],
+        ["css=#password", "css:finder"],
+        ["xpath=//input[@id='password']", "xpath:attributes"],
+        ["xpath=//div[@id='root-container']/div/div/div/div/div[2]/div/div[2]/form/div[2]/input", "xpath:idRelative"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": "wrongpass"
+    }, {
+      "id": "5111966b-7e65-4003-a5d9-03976e0953e6",
+      "comment": "",
+      "command": "click",
+      "target": "id=doLogin",
+      "targets": [
+        ["id=doLogin", "id"],
+        ["css=#doLogin", "css:finder"],
+        ["xpath=//button[@id='doLogin']", "xpath:attributes"],
+        ["xpath=//div[@id='root-container']/div/div/div/div/div[2]/div/div[2]/form/button", "xpath:idRelative"],
+        ["xpath=//form/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Login')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "9d4260e8-8597-4a03-b96a-18ec98621ebc",
+      "comment": "",
+      "command": "waitForElementVisible",
+      "target": "xpath=//*[normalize-space(.)='Invalid credentials']",
+      "targets": [],
+      "value": "10000"
+    }, {
+      "id": "f24ae632-3e31-4026-8632-3395a13c8c37",
+      "comment": "",
+      "command": "assertText",
+      "target": "xpath=//*[normalize-space(.)='Invalid credentials']",
+      "targets": [],
+      "value": "Invalid credentials"
+    }, {
+      "id": "c17dba85-4689-492f-91ca-3b7193b31303",
+      "comment": "",
+      "command": "assertElementPresent",
+      "target": "id=doLogin",
+      "targets": [],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "5502b3d9-5035-4390-95fd-f833251344bf",
+    "name": "StayNow smoke",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["3fdd01b1-cdb8-4109-85b9-ce739fe74321", "03d24dd4-559a-4615-8d70-2d8f1f3452fe", "8b1a5cb0-5391-43ea-8547-1ba27d6f8702"]
+  }],
+  "urls": ["https://automationintesting.online/"],
+  "plugins": []
+}

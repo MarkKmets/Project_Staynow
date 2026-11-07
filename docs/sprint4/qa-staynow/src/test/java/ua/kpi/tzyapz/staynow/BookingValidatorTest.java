@@ -99,4 +99,100 @@ class BookingValidatorTest {
     void checkInTomorrow() {
         assertEquals(List.of(), check(TODAY.plusDays(1), TODAY.plusDays(3), 2));
     }
+@DisplayName("BL-10: {0} гостей у номері на {1} — коректно")
+    @ParameterizedTest(name = "BL-10: {0} гостей у номері на {1} — коректно")
+    @CsvSource({"1, 4", "2, 4", "3, 4", "4, 4", "1, 1"})
+    void guestsWithinCapacity(int guests, int capacity) {
+        assertEquals(List.of(), validator.validate(TODAY, TODAY.plusDays(1), guests, capacity, TODAY));
+    }
+
+    @DisplayName("BL-10: {0} гостей у номері на {1} — GUESTS_OUT_OF_RANGE")
+    @ParameterizedTest(name = "BL-10: {0} гостей у номері на {1} — GUESTS_OUT_OF_RANGE")
+    @CsvSource({"0, 4", "-1, 4", "5, 4", "2, 1"})
+    void guestsOutsideRange(int guests, int capacity) {
+        assertEquals(List.of(BookingError.GUESTS_OUT_OF_RANGE),
+                validator.validate(TODAY, TODAY.plusDays(1), guests, capacity, TODAY));
+    }
+
+    // Червоний на v1: BUG-020 — звіт у GitHub Issues, мітка module
+    @Test
+    @DisplayName("BL-10: кілька порушень одночасно — повертаються всі відповідні коди")
+    void severalViolationsReportedTogether() {
+        List<BookingError> errors = check(TODAY.minusDays(1), TODAY.plusDays(40), 0);
+        assertEquals(3, errors.size(), "Очікувалось 3 коди, отримано: " + errors);
+        assertTrue(errors.containsAll(List.of(BookingError.NIGHTS_OUT_OF_RANGE,
+                BookingError.CHECK_IN_IN_PAST, BookingError.GUESTS_OUT_OF_RANGE)), "Отримано: " + errors);
+    }
+
+    @DisplayName("BL-20: email «{0}» — коректний")
+    @ParameterizedTest(name = "BL-20: email «{0}» — коректний")
+    @CsvSource({"guest@example.com", "a.b+c@mail.example.co.ua", "user_1@host-name.org"})
+    void validEmails(String email) {
+        assertTrue(validator.isValidEmail(email));
+    }
+
+    @DisplayName("BL-20: email «{0}» — некоректний")
+    @ParameterizedTest(name = "BL-20: email «{0}» — некоректний")
+    @CsvSource({"guest", "guest@", "@example.com", "guest@example", "guest@@example.com",
+            "guest@exam ple.com", "guest example@mail.com", "guest@.com"})
+    void invalidEmails(String email) {
+        assertFalse(validator.isValidEmail(email));
+    }
+
+    @Test
+    @DisplayName("BL-20: null і порожній email — некоректні")
+    void nullAndEmptyEmail() {
+        assertFalse(validator.isValidEmail(null));
+        assertFalse(validator.isValidEmail(""));
+    }
+
+    @Test
+    @DisplayName("BL-20: +380 і 9 цифр — коректний телефон")
+    void validPhone() {
+        assertTrue(validator.isValidPhone("+380501234567"));
+        assertTrue(validator.isValidPhone("+380000000000"));
+    }
+
+    @DisplayName("BL-20: телефон «{0}» — некоректний")
+    @ParameterizedTest(name = "BL-20: телефон «{0}» — некоректний")
+    @CsvSource({"380501234567", "+38050123456", "+3805012345678", "+381501234567",
+            "+38050123456a", "0501234567", "+380 50 123 4567", "+380-50-1234567"})
+    void invalidPhones(String phone) {
+        assertFalse(validator.isValidPhone(phone));
+    }
+
+    @Test
+    @DisplayName("BL-20: null і порожній телефон — некоректні")
+    void nullAndEmptyPhone() {
+        assertFalse(validator.isValidPhone(null));
+        assertFalse(validator.isValidPhone(""));
+    }
+
+    @Test
+    @DisplayName("BL-20: коректні дати й контакти — помилок немає")
+    void validateWithContactsOk() {
+        assertEquals(List.of(), validator.validate(TODAY, TODAY.plusDays(2), 2, CAPACITY, TODAY, EMAIL, PHONE));
+    }
+
+    @Test
+    @DisplayName("BL-20: некоректний email — лише INVALID_EMAIL")
+    void validateWithBadEmail() {
+        assertEquals(List.of(BookingError.INVALID_EMAIL),
+                validator.validate(TODAY, TODAY.plusDays(2), 2, CAPACITY, TODAY, "guest@", PHONE));
+    }
+
+    @Test
+    @DisplayName("BL-20: некоректний телефон — лише INVALID_PHONE")
+    void validateWithBadPhone() {
+        assertEquals(List.of(BookingError.INVALID_PHONE),
+                validator.validate(TODAY, TODAY.plusDays(2), 2, CAPACITY, TODAY, EMAIL, "0501234567"));
+    }
+    @Test
+    @DisplayName("BL-10 + BL-20: помилки дат і контактів повертаються разом")
+    void validateWithDateAndContactErrors() {
+        List<BookingError> errors = validator.validate(TODAY, TODAY, 2, CAPACITY, TODAY, "x", "y");
+        assertEquals(3, errors.size(), "Отримано: " + errors);
+        assertTrue(errors.containsAll(List.of(BookingError.CHECK_OUT_NOT_AFTER_CHECK_IN,
+                BookingError.INVALID_EMAIL, BookingError.INVALID_PHONE)), "Отримано: " + errors);
+    }
 }

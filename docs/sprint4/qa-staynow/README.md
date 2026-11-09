@@ -13,7 +13,7 @@ mvn -v
 mvn clean test
 ```
 
-Клонування можна зробити через GitHub Desktop. В IntelliJ відкрити папку з pom.xml.
+Копію можна отримати через GitHub Desktop або Code → Download ZIP для main. Після розпакування перейти до `docs/sprint4/qa-staynow`; в IntelliJ відкрити цю папку з pom.xml.
 
 ## Запуск тестів
 
@@ -25,7 +25,7 @@ mvn test "-DexcludedGroups=none" "-Dheadless=false" "-Dtest=HomePageUiTest"
 
 Перша команда запускає юніт-набір, друга — лише UI, третя — тести головної сторінки з видимим браузером. `mvn test "-DexcludedGroups=none"` запускає обидва набори; загальний BUILD FAILURE на v1 зумовлений дефектами юніт-модуля. Звіти зберігаються в target/surefire-reports/.
 
-Початкова публікація містить основи трьох юніт-класів і два успішні ExampleTest. Після додавання всіх частин: **155 запусків, 21 failure, 1 error**. UI: **9 / 0 / 0**, повторено двічі. [Протокол](docs/surefire-summary.md) містить дати, команди та список невдалих тестів.
+У main злиті внески п’яти учасників: 57 основних тест-методів і два ExampleTest. Фактичний підсумок запуску 09.11.2026: **155 запусків, 21 failure, 1 error**. UI: **9 / 0 / 0**, повторено двічі. [Протокол](docs/surefire-summary.md) містить дати, команди та список невдалих тестів.
 
 ## Структура
 
@@ -42,14 +42,14 @@ mvn test "-DexcludedGroups=none" "-Dheadless=false" "-Dtest=HomePageUiTest"
 
 ## Розподіл тестів
 
-| Учасник | Роль | Частина | Підготовлено методів | PR із фактичним внеском |
+| Учасник | Роль | Частина | Додано методів | PR із фактичним внеском |
 |---|---|---|---|---|
-| Кмець Марк | ТА | BL-10: дати й ночі | 9 | [tests/kmets](https://github.com/MarkKmets/Project_Staynow/pulls?q=is%3Apr%20head%3Atests%2Fkmets) |
-| Тіньков Данііл | КТ | BL-20 і кількість гостей | 13 | [tests/tinkov](https://github.com/MarkKmets/Project_Staynow/pulls?q=is%3Apr%20head%3Atests%2Ftinkov) |
-| Гатченко Ярослав | ІТ | BL-30, BL-40, BL-50: ціна ночі | 7 | [tests/hatchenko](https://github.com/MarkKmets/Project_Staynow/pulls?q=is%3Apr%20head%3Atests%2Fhatchenko) |
-| Сирота Володимир | СМ | BL-50: загальна сума | 14 | [tests/syrota](https://github.com/MarkKmets/Project_Staynow/pulls?q=is%3Apr%20head%3Atests%2Fsyrota) |
-| Сімутін Владислав | АО | BL-60 і BL-70 | 14 | [tests/simutin](https://github.com/MarkKmets/Project_Staynow/pulls?q=is%3Apr%20head%3Atests%2Fsimutin) |
+| Кмець Марк | ТА | BL-10: дати й ночі | 9 | [PR #2](https://github.com/MarkKmets/Project_Staynow/pull/2) |
+| Тіньков Данііл | КТ | BL-20 і кількість гостей | 13 | [PR #3](https://github.com/MarkKmets/Project_Staynow/pull/3) |
+| Гатченко Ярослав | ІТ | BL-30, BL-40, BL-50: ціна ночі | 7 | [PR #4](https://github.com/MarkKmets/Project_Staynow/pull/4) |
+| Сирота Володимир | СМ | BL-50: загальна сума | 14 | [PR #5](https://github.com/MarkKmets/Project_Staynow/pull/5) |
+| Сімутін Владислав | АО | BL-60 і BL-70 | 14 | [PR #6](https://github.com/MarkKmets/Project_Staynow/pull/6) |
 
-Рецензент — Сирота Володимир; його частину перевіряє Тіньков Данііл. Тести, які відтворюють BUG-019…024, залишаються червоними на v1. Звіти реєструються в [GitHub Issues](https://github.com/MarkKmets/Project_Staynow/issues) з міткою module.
+Рецензент — Сирота Володимир; його частину перевіряє Тіньков Данііл. Тести, які відтворюють [BUG-019](https://github.com/MarkKmets/Project_Staynow/issues/7)…024, залишаються червоними на v1. Шість звітів зареєстровані в [GitHub Issues](https://github.com/MarkKmets/Project_Staynow/issues) з міткою module.
 
 [Досьє спринта](../README.md), [аудит](../audit.md), [таблиця задач](../task-board.md), [ретро](../retro.md).

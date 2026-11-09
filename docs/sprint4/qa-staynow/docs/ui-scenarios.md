@@ -11,14 +11,14 @@
 | TC-001 | F-10 | `HomePageUiTest.homePageShowsTitleBookNowAndSixMenuItems` | відкрити `/`; прочитати заголовок, кнопку, меню | `h1`; `//a[normalize-space()='Book Now']`; `nav a.nav-link` | видимість `h1`; меню = 6 пунктів у порядку | Гатченко / Сирота |
 | TC-004 | F-10 | `HomePageUiTest.adminMenuOpensLoginPage` | клік «Admin» | `//nav//a[normalize-space()='Admin']`; заголовок «Login» | URL закінчується `/admin` | Гатченко / Сирота |
 | TC-034 | F-80, S-10 | `AdminLoginUiTest.validLoginOpensRoomManagement` | вхід admin/password | `input[placeholder='Enter username']`; `input[type='password']`; `//button[normalize-space()='Login']` | форма входу зникла; Logout є; URL без `password` і `?` | Гатченко / Сирота |
-| TC-035 | F-80, GUI-70 | `AdminLoginUiTest.wrongPasswordKeepsLoginPage` | вхід admin/wrongpass | ті самі | «Login» лишається; «Room #» немає | Гатченко / Сирота |
+| TC-035 | F-80, GUI-70 | `AdminLoginUiTest.wrongPasswordKeepsLoginPage` | вхід admin/wrongpass | ті самі | видима серверна помилка; «Login» лишається; «Room #» немає | Гатченко / Сирота |
 | TC-036 | GUI-70 | `AdminLoginUiTest.loginPageLayout` | відкрити `/admin`, ввести p1 | ті самі + `Front Page`, `Logout` | заголовок, підказки, `type=password`, шапка | Гатченко / Сирота |
 | TC-024 | F-70, GUI-85 | `ContactFormUiTest.validFormShowsThanksWithNameAndSubject` | заповнити форму, Submit | `#name #email #phone #subject #description`; `//button[normalize-space()='Submit']` | `#name` зникло; текст містить ім’я й тему | Гатченко / Сирота |
 | TC-025 | F-70 | `ContactFormUiTest.minimumLengthsAreAccepted` | Subject 5, Message 20, Phone 11 | ті самі | форму замінено подякою | Гатченко / Сирота |
 | TC-027 | F-70, GUI-60 | `ContactFormUiTest.emptyFormIsNotSubmitted` | Submit без даних | ті самі + маркери помилок `.alert, .is-invalid, [role='alert']…` | форма на місці, подяки немає, помилки є | Гатченко / Сирота |
 | TC-028 | F-70, GUI-60 | `ContactFormUiTest.subjectOfFourCharactersIsRejected` | Subject `Abcd` | ті самі | форма на місці, подяки немає | Гатченко / Сирота |
 
-Усі тести мають @Tag("ui"), явні WebDriverWait, окреме створення й закриття браузера. Thread.sleep та implicit waits не використовуються. Локатори перевірено живими прогонами 05–06.11.2026. Підсумок двох успішних прогонів — у [протоколі Surefire](surefire-summary.md).
+Усі тести мають @Tag("ui"), явні WebDriverWait, окреме створення й закриття браузера. Thread.sleep та implicit waits не використовуються. Актуальність локаторів підтверджено двома прогонами 09.11.2026: у кожному 9 запусків, 0 failures, 0 errors, 0 skipped. Підсумок двох успішних прогонів — у [протоколі Surefire](surefire-summary.md).
 
 ## Межі покриття ручних кейсів
 

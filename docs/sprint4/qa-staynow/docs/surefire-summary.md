@@ -41,16 +41,16 @@ BUILD FAILURE
 
 | Дефект | Тести, що не пройшли | Результат |
 |---|---|---|
-| BUG-019, BL-10 | BookingValidatorTest.allowedNightsAreAccepted[5] — 30 ночей | 1 failure |
-| BUG-020, BL-10 | BookingValidatorTest.checkInYesterdayCheckOutTomorrow; severalViolationsReportedTogether | 2 failures |
-| BUG-021, BL-30/50 | PriceCalculatorTest.weekendNight[5], [7]; nightPrice[4], [5], [6], [7]; totalFridayNightOnly; totalSundayNightOnly; totalSixNightsNoDiscount; totalAcrossSeasonBoundary; totalSaturdayAndSundayInHighSeasonStart | 11 failures |
-| BUG-022, BL-50 | PriceCalculatorTest.nightPriceRoundsHalfUpAboveHalf; nightPriceRoundsHalfUpAtExactHalf; nightPriceRoundsHalfUpSmallValue | 3 failures |
-| BUG-023, BL-60 | AvailabilityTest.cancellationFee[3]; refund[1] — скасування за 7 днів | 2 failures |
-| BUG-024, BL-70 | AvailabilityTest.intervalAgainstExistingStay[8], [9]; backToBackBookingsAllowed | 2 failures, 1 error |
+| [BUG-019](https://github.com/MarkKmets/Project_Staynow/issues/7), BL-10 | BookingValidatorTest.allowedNightsAreAccepted[5] — 30 ночей | 1 failure |
+| [BUG-020](https://github.com/MarkKmets/Project_Staynow/issues/8), BL-10 | BookingValidatorTest.checkInYesterdayCheckOutTomorrow; severalViolationsReportedTogether | 2 failures |
+| [BUG-021](https://github.com/MarkKmets/Project_Staynow/issues/9), BL-30/50 | PriceCalculatorTest.weekendNight[5], [7]; nightPrice[4], [5], [6], [7]; totalFridayNightOnly; totalSundayNightOnly; totalSixNightsNoDiscount; totalAcrossSeasonBoundary; totalSaturdayAndSundayInHighSeasonStart | 11 failures |
+| [BUG-022](https://github.com/MarkKmets/Project_Staynow/issues/10), BL-50 | PriceCalculatorTest.nightPriceRoundsHalfUpAboveHalf; nightPriceRoundsHalfUpAtExactHalf; nightPriceRoundsHalfUpSmallValue | 3 failures |
+| [BUG-023](https://github.com/MarkKmets/Project_Staynow/issues/11), BL-60 | AvailabilityTest.cancellationFee[3]; refund[1] — скасування за 7 днів | 2 failures |
+| [BUG-024](https://github.com/MarkKmets/Project_Staynow/issues/12), BL-70 | AvailabilityTest.intervalAgainstExistingStay[8], [9]; backToBackBookingsAllowed | 2 failures, 1 error |
 
 backToBackBookingsAllowed завершується **Error** через IllegalStateException під час другого суміжного бронювання. Решта 21 невдале виконання — **Failure** через розбіжності очікуваного й фактичного результату.
 
-Разом успішні 133 виконання; 22 невдалі виконання відтворюють шість відомих дефектів v1. Очікування тестів залишено за SRS для регресійної перевірки виправленої версії. Звіти реєструються в [GitHub Issues](https://github.com/MarkKmets/Project_Staynow/issues) з міткою module.
+Разом успішні 133 виконання; 22 невдалі виконання відтворюють шість відомих дефектів v1. Очікування тестів залишено за SRS для регресійної перевірки виправленої версії. Шість звітів зареєстровані в [GitHub Issues](https://github.com/MarkKmets/Project_Staynow/issues) з міткою module.
 
 ## UI тести
 

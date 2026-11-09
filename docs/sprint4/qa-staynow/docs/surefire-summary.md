@@ -1,16 +1,31 @@
 # Протокол запуску Surefire
 
-**Команда:** Backrooms. **Модуль:** StayNow v1.0.0. **Дата перевірки:** 06.11.2026. **Об’єкт:** повний локальний набір із 57 основних юніт-методів і 9 UI-сценаріїв.
+**Команда:** Backrooms. **Продукт:** StayNow. **Модуль:** staynow-module v1.0.0.  
+**Виконавець запуску:** Гатченко Ярослав (ІТ). **Дата:** 09.11.2026.  
+**Версія проєкту:** завантажена копія main після злиття внесків учасників.
 
 ## Середовище
 
-Linux amd64, OpenJDK 17.0.20, Maven 3.9.9, JUnit Jupiter 5.10.2, Surefire 3.2.5, Selenium 4.21.0. Для UI — Chrome for Testing headless shell і ChromeDriver 157.0.8103.38. Умови перевірочного середовища наведено в [аудиті](../../audit.md).
+| Параметр | Значення |
+|---|---|
+| ОС | Windows 11, amd64 |
+| Java | 17.0.21, Eclipse Adoptium |
+| Maven | Apache Maven 3.9.16 |
+| JUnit | Jupiter 5.10.2 |
+| Surefire | 3.2.5 |
+| Selenium | 4.21.0 |
+| Браузер UI | Chrome 157.0.8103.38 |
+
+Команди виконано з папки docs/sprint4/qa-staynow. Версії Java та Maven перевірено командою `mvn -v`.
 
 ## Юніт тести
 
-Команда: `mvn clean test`. Завершення: **06.11.2026, 13:26:07 +02:00**.
+Команда: `mvn clean test`. Завершення: **09.11.2026, 11:53:42 +02:00**. Тривалість: **6.129 с**.
 
-**Tests run: 155, Failures: 21, Errors: 1, Skipped: 0 — BUILD FAILURE.**
+```text
+Tests run: 155, Failures: 21, Errors: 1, Skipped: 0
+BUILD FAILURE
+```
 
 | Клас | Запусків | Failures | Errors | Skipped |
 |---|---|---|---|---|
@@ -18,27 +33,42 @@ Linux amd64, OpenJDK 17.0.20, Maven 3.9.9, JUnit Jupiter 5.10.2, Surefire 3.2.5,
 | PriceCalculatorTest | 66 | 14 | 0 | 0 |
 | AvailabilityTest | 37 | 4 | 1 | 0 |
 | ExampleTest | 2 | 0 | 0 | 0 |
+| **Разом** | **155** | **21** | **1** | **0** |
 
 ## Невдалі тести і дефекти
 
-| Тест, що не пройшов | Дефект |
-|---|---|
-| `BookingValidatorTest.allowedNightsAreAccepted[5]` (30 ночей) | BUG-019 |
-| `BookingValidatorTest.checkInYesterdayCheckOutTomorrow`, `severalViolationsReportedTogether` | BUG-020 |
-| `PriceCalculatorTest`: `weekendNight[5]`, `weekendNight[7]`, `nightPrice[4]`, `[5]`, `[6]`, `[7]`, `totalFridayNightOnly`, `totalSundayNightOnly`, `totalSixNightsNoDiscount`, `totalAcrossSeasonBoundary`, `totalSaturdayAndSundayInHighSeasonStart` | BUG-021 |
-| `PriceCalculatorTest.nightPriceRoundsHalfUp*` (3) | BUG-022 |
-| `AvailabilityTest.cancellationFee[3]`, `refund[1]` (7 днів) | BUG-023 |
-| `AvailabilityTest.intervalAgainstExistingStay[8]`, `[9]`, `backToBackBookingsAllowed` (**Error**: `IllegalStateException`) | BUG-024 |
+Індекси в квадратних дужках позначають виконання параметризованих методів.
 
-Усі 22 невдалі виконання відповідають шести дефектам v1. backToBackBookingsAllowed завершується Error через IllegalStateException; решта 21 — Failure. Інші 133 виконання успішні. Очікування взято з SRS; дефектні тести збережено для регресії v2.
+| Дефект | Тести, що не пройшли | Результат |
+|---|---|---|
+| BUG-019, BL-10 | BookingValidatorTest.allowedNightsAreAccepted[5] — 30 ночей | 1 failure |
+| BUG-020, BL-10 | BookingValidatorTest.checkInYesterdayCheckOutTomorrow; severalViolationsReportedTogether | 2 failures |
+| BUG-021, BL-30/50 | PriceCalculatorTest.weekendNight[5], [7]; nightPrice[4], [5], [6], [7]; totalFridayNightOnly; totalSundayNightOnly; totalSixNightsNoDiscount; totalAcrossSeasonBoundary; totalSaturdayAndSundayInHighSeasonStart | 11 failures |
+| BUG-022, BL-50 | PriceCalculatorTest.nightPriceRoundsHalfUpAboveHalf; nightPriceRoundsHalfUpAtExactHalf; nightPriceRoundsHalfUpSmallValue | 3 failures |
+| BUG-023, BL-60 | AvailabilityTest.cancellationFee[3]; refund[1] — скасування за 7 днів | 2 failures |
+| BUG-024, BL-70 | AvailabilityTest.intervalAgainstExistingStay[8], [9]; backToBackBookingsAllowed | 2 failures, 1 error |
+
+backToBackBookingsAllowed завершується **Error** через IllegalStateException під час другого суміжного бронювання. Решта 21 невдале виконання — **Failure** через розбіжності очікуваного й фактичного результату.
+
+Разом успішні 133 виконання; 22 невдалі виконання відтворюють шість відомих дефектів v1. Очікування тестів залишено за SRS для регресійної перевірки виправленої версії. Звіти реєструються в [GitHub Issues](https://github.com/MarkKmets/Project_Staynow/issues) з міткою module.
 
 ## UI тести
 
-Команда: `mvn clean test "-DexcludedGroups=none" "-Dtest=*UiTest"`.
+Для кожного з двох прогонів виконано:
 
-| Прогін | Завершення 06.11.2026 | Tests run | Failures | Errors | Skipped | Результат |
-|---|---|---|---|---|---|---|
-| 1 | 12:37:30 +02:00 | 9 | 0 | 0 | 0 | BUILD SUCCESS |
-| 2 | 12:39:42 +02:00 | 9 | 0 | 0 | 0 | BUILD SUCCESS |
+```powershell
+mvn test "-DexcludedGroups=none" "-Dtest=*UiTest"
+```
 
-В обох прогонах: HomePageUiTest — 2, AdminLoginUiTest — 3, ContactFormUiTest — 4. Під час розширення юніт-набору UI-код не змінювався.
+| Прогін | Завершення 09.11.2026 | Тривалість | Tests run | Failures | Errors | Skipped | Результат |
+|---|---|---|---|---|---|---|---|
+| 1 | 12:01:31 +02:00 | 30.214 с | 9 | 0 | 0 | 0 | BUILD SUCCESS |
+| 2 | 12:02:27 +02:00 | 24.794 с | 9 | 0 | 0 | 0 | BUILD SUCCESS |
+
+В обох прогонах: HomePageUiTest — 2 виконання, AdminLoginUiTest — 3, ContactFormUiTest — 4. Пропущених тестів немає.
+
+Попередження Selenium щодо CDP 157 не перешкодили виконанню цих WebDriver-сценаріїв: обидва прогони завершилися BUILD SUCCESS. У терміналі зазначено platform encoding Cp1252; частина українських повідомлень відображена знаками питання. Числові результати, назви методів і типи невдалих перевірок читаються у вихідному журналі.
+
+## Висновок
+
+Повний набір зі злитої версії проєкту відтворив очікувані шість дефектів модуля v1: **155 / 21 / 1 / 0**. UI-набір двічі пройшов без невдач: **9 / 0 / 0 / 0**. Показники наведено як Tests run / Failures / Errors / Skipped.
